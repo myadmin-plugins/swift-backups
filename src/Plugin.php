@@ -27,8 +27,9 @@ class Plugin {
 	 */
 	public static function getHooks() {
 		return [
-			//'system.settings' => [__CLASS__, 'getSettings'],
+			'system.settings' => [__CLASS__, 'getSettings'],
 			//'ui.menu' => [__CLASS__, 'getMenu'],
+			'function.requirements' => [__CLASS__, 'getRequirements']
 		];
 	}
 
@@ -50,9 +51,6 @@ class Plugin {
 	public static function getRequirements(GenericEvent $event) {
 		$loader = $event->getSubject();
 		$loader->add_requirement('class.Swift', '/../vendor/detain/myadmin-swift-backups/src/Swift.php');
-		$loader->add_requirement('deactivate_kcare', '/../vendor/detain/myadmin-swift-backups/src/abuse.inc.php');
-		$loader->add_requirement('deactivate_abuse', '/../vendor/detain/myadmin-swift-backups/src/abuse.inc.php');
-		$loader->add_requirement('get_abuse_licenses', '/../vendor/detain/myadmin-swift-backups/src/abuse.inc.php');
 	}
 
 	/**
@@ -60,8 +58,10 @@ class Plugin {
 	 */
 	public static function getSettings(GenericEvent $event) {
 		$settings = $event->getSubject();
-		$settings->add_text_setting('General', 'Swift', 'abuse_imap_user', 'Swift IMAP User:', 'Swift IMAP Username', ABUSE_IMAP_USER);
-		$settings->add_text_setting('General', 'Swift', 'abuse_imap_pass', 'Swift IMAP Pass:', 'Swift IMAP Password', ABUSE_IMAP_PASS);
+		$settings->add_text_setting('Backups', 'Swift', 'swift_auth_url', 'Swift Auth URL:', 'Swift Auth URL', SWIFT_AUTH_URL);
+		$settings->add_text_setting('Backups', 'Swift', 'swift_auth_v1_url', 'Swift Auth v1 URL:', 'Swift Auth v1 URL', SWIFT_AUTH_V1_URL);
+		$settings->add_text_setting('Backups', 'Swift', 'swift_admin_user', 'Swift Admin User:', 'Swift Admin User', SWIFT_ADMIN_USER);
+		$settings->add_text_setting('Backups', 'Swift', 'swift_admin_key', 'Swift Admin Key:', 'Swift Admin Key', SWIFT_ADMIN_KEY);
 	}
 
 }
