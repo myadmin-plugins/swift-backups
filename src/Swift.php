@@ -52,8 +52,8 @@
 		}
 
 		/**
-		 * @param bool $username
-		 * @param bool $password
+		 * @param bool|string $username
+		 * @param bool|string $password
 		 * @return array|bool
 		 */
 		public function authenticate($username = false, $password = false) {
