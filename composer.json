@@ -34,7 +34,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Detain\\MyAdminSwift\\": "src\/"
+            "Detain\\MyAdminSwift\\": "src/"
         }
     }
 }
