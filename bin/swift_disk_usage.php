@@ -4,7 +4,7 @@ require_once __DIR__.'/../../include/functions.inc.php';
 function_requirements('class.Swift');
 $sw = new Swift;
 $module = 'vps';
-$settings = get_module_settings($module);
+$settings = \get_module_settings($module);
 $db = get_module_db($module);
 		$ids = [];
 		$data = [];
