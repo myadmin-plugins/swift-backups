@@ -57,12 +57,10 @@
 		 * @return array|bool
 		 */
 		public function authenticate($username = false, $password = false) {
-			if ($username === false) {
+			if ($username === false)
 				$username = $this->admin_user.':'.$this->admin_user;
-			}
-			if ($password === false) {
+			if ($password === false)
 				$password = $this->auth_key;
-			}
 			$options = [
 				CURLOPT_HTTPGET => true,
 				CURLOPT_HEADER => true,
@@ -75,19 +73,15 @@
 			$this->storage_url = false;
 			$this->storage_token = false;
 			foreach ($lines as $line) {
-				if (preg_match('/^X\-Storage\-Url\: (.*)$/', $line, $matches)) {
+				if (preg_match('/^X\-Storage\-Url\: (.*)$/', $line, $matches))
 					$this->storage_url = trim($matches[1]);
-				}
-				if (preg_match('/^X-Storage-Token: (.*)$/', $line, $matches)) {
+				if (preg_match('/^X-Storage-Token: (.*)$/', $line, $matches))
 					$this->storage_token = trim($matches[1]);
-				}
-				if ($this->storage_token !== false && $this->storage_url !== false) {
+				if ($this->storage_token !== false && $this->storage_url !== false)
 					break;
-				}
 			}
-			if ($this->storage_token === false && $this->storage_url === false) {
+			if ($this->storage_token === false && $this->storage_url === false)
 				return false;
-			}
 			return [$this->storage_url, $this->storage_token];
 		}
 
@@ -106,9 +100,8 @@
 		 */
 		public function acl($container = '', $read = '', $write = '') {
 			$container = trim($container);
-			if ($container == '') {
+			if ($container == '')
 				return false;
-			}
 			$options = [
 				//CURLOPT_HEADER => true,
 				//CURLOPT_NOBODY => true,
