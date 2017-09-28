@@ -52,9 +52,7 @@ foreach ($repos as $repo)
 					if (!is_numeric($usage['Content-Length']))
 					{
 						myadmin_log('scripts', 'info', "{$vps['vps_hostname']} {$match} invalid content length " .var_export($usage, true), __LINE__, __FILE__);
-					}
-					else
-					{
+					} else {
 						$used_gb = round((isset($usage['Content-Length']) ? $usage['Content-Length'] : 0) / 1024 / 1024 / 1024, 2);
 						//echo "{$vps['vps_hostname']} {$match} {$used_gb} GB\n";
 						$total_used_gb = bcadd($used_gb, $total_used_gb, 2);
