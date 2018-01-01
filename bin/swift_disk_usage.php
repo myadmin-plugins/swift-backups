@@ -47,7 +47,7 @@ $db = get_module_db($module);
 							{
 								myadmin_log('scripts', 'info', var_export($usage, true), __LINE__, __FILE__);
 							}
-echo $vps['vps_hostname'] . '	' . $match . '	' . (isset($usage['Content-Length']) ? Scale($usage['Content-Length'], 'bytes', 1) : '') . "\n";
+echo $vps['vps_hostname'] . '	' . $match . '	' . (isset($usage['Content-Length']) ? Scale($usage['Content-Length'], 'bytes', 1) : '').PHP_EOL;
 						}
 					}
 
