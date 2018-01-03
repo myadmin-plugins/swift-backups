@@ -513,7 +513,7 @@
 		FILE=$2;
 		CONTAINER=$1;
 		// remove final /r
-		//encoded_value=$(python -c "import urllib; print urllib.quote('''$value''')")
+		//encoded_value=$(python -c "import urllib; print urllib.quote('''{$value}''')")
 		URL=`urlencode "${CONTAINER}/${FILE}"`;
 		${curl} -s $CURLOPTS -I -H "X-Auth-Token: ${APIKEY}" "${STORAGE_URL}/${URL}" | grep ^Etag: | awk '{print $2}' | tr -d '\r'
 
