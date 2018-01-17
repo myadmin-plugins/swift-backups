@@ -93,6 +93,13 @@
 		}
 
 		/**
+		 * @return string
+		 */
+		public function get_token() {
+			return $this->storage_token;
+		}
+
+		/**
 		 * @param string $container
 		 * @param string $read
 		 * @param string $write
