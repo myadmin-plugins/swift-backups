@@ -74,6 +74,8 @@ class Swift
 			$try++;
 			//echo "{$this->v1_auth_url} Authenticate Attempt {$try}\n";
 			$response = getcurlpage($this->v1_auth_url, '', $options);
+			if (preg_match_all('/^X\-Storage\-\w+: .*$/m', $response))
+				break;
 			//echo "Response: $response\n";
 		}
 		$lines = explode("\n", $response);
