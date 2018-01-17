@@ -8,34 +8,44 @@ function_requirements('class.Swift');
 $swift_backup_free_gb=50;
 $swift_backup_cost_gb=0.15;
 $sw = new Swift;
+$sw->set_v1_auth_url('http://storage-nj.interserver.net/auth/v1.0');
 $module = 'vps';
 $settings = \get_module_settings($module);
 $db = get_module_db($module);
 $ids = [];
 $data = [];
 
-function new_client_request(&$loop, &$retry, $client, $type, $repo_name, $container = '') {
-	global $repos;
-	$request = $client->request('GET', $repos[$type][$repo_name]['url'].'/'.$container.'/', ['X-Auth-Token' => $repos[$type][$repo_name]['token']]);
-	$request->on('response', function (Response $response) use (&$retry, &$repos, $type, $repo_name, $container) {
-		++$retry;
-		$headers = $response->getHeaders();
-		echo $type.' '.$repo_name.' '.$container.' Headers:'.var_export($headers, true).PHP_EOL;
-		$response->on('data', function ($chunk) use (&$retry, &$repos, $type, $repo_name, $container) {
-			echo $type.' '.$repo_name.' Attempt #'.$retry.' '.$container.' DATA:'.$chunk.PHP_EOL;
+function new_client_request($type, $repo_name, $container = '') {
+	global $repos, $retry, $client;
+	if (!isset($retry["{$type}{$repo_name}{$container}"]))
+		$retry["{$type}{$repo_name}{$container}"] = 0;
+	$request = $client->request('GET', $repos[$type][$repo_name]['url'].'/'.$container, ['X-Auth-Token' => $repos[$type][$repo_name]['token']]);
+	$request->on('response', function (Response $response) use ($type, $repo_name, $container) {
+		global $repos, $retry, $client;
+		$response->on('data', function ($chunk) use ($type, $repo_name, $container, $response) {
+			global $repos, $retry, $client;
+			$headers = $response->getHeaders();
+			if (!isset($headers['X-Trans-Id'])) {
+				if ($retry["{$type}{$repo_name}{$container}"] < 5) {
+					echo "Retrying {$type} {$repo_name} {$container}\n";
+					$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
+					//new_client_request($type, $repo_name, $container);
+				}
+			} else
+				echo $type.' '.$repo_name.' '.$container.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' DATA Length:'.strlen($chunk).PHP_EOL;
 			$repos[$type][$repo_name]['usage'][$container] .= $chunk;
 		});
-		$response->on('end', function () use (&$retry, $type, $repo_name, $container) {
-			//echo $type.' '.$repo_name.' Attempt #'.$retry.' '.$container.' DONE' . PHP_EOL;
+		$response->on('end', function () use ($type, $repo_name, $container) {
+			global $repos, $retry, $client;
+			//echo $type.' '.$repo_name.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' '.$container.' DONE' . PHP_EOL;
 		});
 	});
-	$request->on('error', function (\Exception $e) use (&$retry, &$loop, $type, $repo_name, $container) {
-		++$retry;
-		echo 'Error Occurred Attempt #'.$retry.' with '.$type.' '.$repo_name.' '.$container.':'.$e->getMessage().PHP_EOL;
-		if ($retry < 5) {
-			++$retry;
-			$client = new Client($loop);
-			$request = new_client_request($loop, $retry, $client, $type, $repo_name, $container);
+	$request->on('error', function (\Exception $e) use ($type, $repo_name, $container) {
+		global $repos, $retry, $client;
+		echo 'Error Occurred Attempt #'.$retry["{$type}{$repo_name}{$container}"].' with '.$type.' '.$repo_name.' '.$container.':'.$e->getMessage().PHP_EOL;
+		if ($retry["{$type}{$repo_name}{$container}"] < 5) {
+			$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
+			//new_client_request($type, $repo_name, $container);
 		}
 	});
 	$request->end();
@@ -50,7 +60,7 @@ while ($db->next_record(MYSQL_ASSOC))
 	$ids[] = $db->Record[$settings['PREFIX'].'_id'];
 }
 */
-global $repos;
+global $repos, $client, $retry, $loop;
 $repos = [
 	'other' => [
 		'my' => ['username' => SWIFT_MY_USER, 'password' => SWIFT_MY_PASS],
@@ -60,7 +70,7 @@ $repos = [
 	],
 	'vps' => [
 		'openvz' => ['username' => SWIFT_OPENVZ_USER, 'password' => SWIFT_OPENVZ_PASS],
-		'kvm' => ['username' => SWIFT_KVM_USER, 'password' => SWIFT_KVM_PASS]
+		//'kvm' => ['username' => SWIFT_KVM_USER, 'password' => SWIFT_KVM_PASS]
 	],
 ];
 $backups = [];
@@ -70,29 +80,24 @@ $sum_chargable_amount = 0;
 $loop = React\EventLoop\Factory::create();
 $client = new Client($loop);
 $start = time();
+ini_set('default_socket_timeout', 30);
 echo 'Starting to Authenticate and build Requests at '.$start.PHP_EOL;
 foreach ($repos as $type => $type_repos) {
 	foreach ($type_repos as $repo_name => $repo) {
-		$retry = 0;
 		$storage_url = '';
-		while ($storage_url == '' && $retry < 10) {
-			++$retry;
-			$sw = new Swift;
-			$response = $sw->authenticate($repo['username'], $repo['password']);
-			if ($response === FALSE || !is_array($response) || sizeof($response) != 2)
-				echo 'Got odd response:'.var_export($response, true).PHP_EOL;
-			else {
-				list($storage_url, $storage_token) = $response;
-				echo $type.' '.$repo_name.' Storage URL:'.$storage_url.' and Token:'.$storage_token.PHP_EOL;
-			}
-		}
+		$sw = new Swift;
+		$sw->set_v1_auth_url('http://storage-nj.interserver.net/auth/v1.0');
+		$response = $sw->authenticate($repo['username'], $repo['password'], 10);
+		list($storage_url, $storage_token) = $response;
+		$storage_url = str_replace('https://storage-nj.interserver.net:8080/', 'http://storage-nj.interserver.net/', $storage_url);
+		echo $type.' '.$repo_name.' Storage URL:'.$storage_url.' and Token:'.$storage_token.PHP_EOL;
 		$repos[$type][$repo_name]['sw'] = $sw;
 		$repos[$type][$repo_name]['url'] = $storage_url;
 		$repos[$type][$repo_name]['token'] = $storage_token;
-		$retry = 0;
+		$retry["{$type}{$repo_name}"] = 0;
 		$repos[$type][$repo_name]['ls'] = '';
-		while ($repos[$type][$repo_name]['ls'] == '' && $retry < 10) {
-			++$retry;
+		while ($repos[$type][$repo_name]['ls'] == '' && $retry["{$type}{$repo_name}"] < 5) {
+			$retry["{$type}{$repo_name}"] = $retry["{$type}{$repo_name}"] + 1;
 			$sw = $repos[$type][$repo_name]['sw'];
 			$response = $sw->ls();
 			if ($response === FALSE)
@@ -100,13 +105,18 @@ foreach ($repos as $type => $type_repos) {
 			else
 				$repos[$type][$repo_name]['ls'] = $response;
 		}
-		$repos[$type][$repo_name]['ls'] = explode("\n", $repos[$type][$repo_name]['ls']);
-		echo "Loaded ".sizeof($repos[$type][$repo_name]['ls'])." Entries for ".$type.' '.$repo_name.PHP_EOL;
-		$repos[$type][$repo_name]['usage'] = [];
-		foreach ($repos[$type][$repo_name]['ls'] as $container) {
-			$repos[$type][$repo_name]['usage'][$container] = '';
-			$retry = 1;
-			$request = new_client_request($loop, $retry, $client, $type, $repo_name, $container);
+		if ($response !== FALSE) {
+			$repos[$type][$repo_name]['ls'] = explode("\n", trim($response));
+			echo "Loaded ".sizeof($repos[$type][$repo_name]['ls'])." Entries for ".$type.' '.$repo_name.PHP_EOL;
+			$repos[$type][$repo_name]['usage'] = [];
+			foreach ($repos[$type][$repo_name]['ls'] as $container) {
+				$repos[$type][$repo_name]['usage'][$container] = '';
+				$retry["{$type}{$repo_name}{$container}"] = 1;
+				echo "Looking up {$repo_name}({$type}) container {$container}\n";
+				new_client_request($type, $repo_name, $container);
+			}
+		} else {
+			echo "Couldnt load {$type} {$repo_name} Giving up".PHP_EOL;
 		}
 	}
 }
