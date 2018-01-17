@@ -2,18 +2,9 @@
 
 use React\HttpClient\Client;
 use React\HttpClient\Response;
+use React\Socket\Connector;
 
 require_once __DIR__.'/../../../../include/functions.inc.php';
-function_requirements('class.Swift');
-$swift_backup_free_gb=50;
-$swift_backup_cost_gb=0.15;
-$sw = new Swift;
-$sw->set_v1_auth_url('http://storage-nj.interserver.net/auth/v1.0');
-$module = 'vps';
-$settings = \get_module_settings($module);
-$db = get_module_db($module);
-$ids = [];
-$data = [];
 
 function new_client_request($type, $repo_name, $container = '') {
 	global $repos, $retry, $client;
@@ -29,7 +20,7 @@ function new_client_request($type, $repo_name, $container = '') {
 				if ($retry["{$type}{$repo_name}{$container}"] < 5) {
 					echo "Retrying {$type} {$repo_name} {$container}\n";
 					$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
-					//new_client_request($type, $repo_name, $container);
+					new_client_request($type, $repo_name, $container);
 				}
 			} else
 				echo $type.' '.$repo_name.' '.$container.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' DATA Length:'.strlen($chunk).PHP_EOL;
@@ -45,7 +36,7 @@ function new_client_request($type, $repo_name, $container = '') {
 		echo 'Error Occurred Attempt #'.$retry["{$type}{$repo_name}{$container}"].' with '.$type.' '.$repo_name.' '.$container.':'.$e->getMessage().PHP_EOL;
 		if ($retry["{$type}{$repo_name}{$container}"] < 5) {
 			$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
-			//new_client_request($type, $repo_name, $container);
+			new_client_request($type, $repo_name, $container);
 		}
 	});
 	$request->end();
@@ -61,6 +52,18 @@ while ($db->next_record(MYSQL_ASSOC))
 }
 */
 global $repos, $client, $retry, $loop;
+$timeout = 15;
+ini_set('default_socket_timeout', $timeout);
+function_requirements('class.Swift');
+$swift_backup_free_gb=50;
+$swift_backup_cost_gb=0.15;
+$sw = new Swift;
+$sw->set_v1_auth_url('http://storage-nj.interserver.net/auth/v1.0');
+$module = 'vps';
+$settings = \get_module_settings($module);
+$db = get_module_db($module);
+$ids = [];
+$data = [];
 $repos = [
 	'other' => [
 		'my' => ['username' => SWIFT_MY_USER, 'password' => SWIFT_MY_PASS],
@@ -70,7 +73,7 @@ $repos = [
 	],
 	'vps' => [
 		'openvz' => ['username' => SWIFT_OPENVZ_USER, 'password' => SWIFT_OPENVZ_PASS],
-		//'kvm' => ['username' => SWIFT_KVM_USER, 'password' => SWIFT_KVM_PASS]
+		'kvm' => ['username' => SWIFT_KVM_USER, 'password' => SWIFT_KVM_PASS]
 	],
 ];
 $backups = [];
@@ -78,9 +81,9 @@ $sum_used_gb = 0;
 $sum_chargable_gb = 0;
 $sum_chargable_amount = 0;
 $loop = React\EventLoop\Factory::create();
-$client = new Client($loop);
+$connector = new Connector($loop, ['timeout' => $timeout]);
+$client = new Client($loop, $connector);
 $start = time();
-ini_set('default_socket_timeout', 30);
 echo 'Starting to Authenticate and build Requests at '.$start.PHP_EOL;
 foreach ($repos as $type => $type_repos) {
 	foreach ($type_repos as $repo_name => $repo) {
@@ -112,7 +115,7 @@ foreach ($repos as $type => $type_repos) {
 			foreach ($repos[$type][$repo_name]['ls'] as $container) {
 				$repos[$type][$repo_name]['usage'][$container] = '';
 				$retry["{$type}{$repo_name}{$container}"] = 1;
-				echo "Looking up {$repo_name}({$type}) container {$container}\n";
+				//echo "Looking up {$repo_name}({$type}) container {$container}\n";
 				new_client_request($type, $repo_name, $container);
 			}
 		} else {
