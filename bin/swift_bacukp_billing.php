@@ -1,6 +1,6 @@
 #!/usr/bin/php -q
 <?php
-require_once __DIR__.'/../../include/functions.inc.php';
+require_once __DIR__.'/../../../../include/functions.inc.php';
 function_requirements('class.Swift');
 $swift_backup_free_gb=50;
 $swift_backup_cost_gb=0.15;
