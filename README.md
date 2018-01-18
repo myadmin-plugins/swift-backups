@@ -24,5 +24,5 @@ composer require detain/myadmin-swift-backups
 
 ## License
 
-The Swift handling plugin for MyAdmin class is licensed under the LGPL-v2 license.
+The Swift handling plugin for MyAdmin class is licensed under the LGPL-v2.1 license.
 
