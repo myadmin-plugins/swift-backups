@@ -63,9 +63,9 @@ foreach ($repos as $repo) {
 			}
 		}
 		if ($type == 'Hosts')
-			$client_backup['children'][] = $container_backup;
-		else
 			$host_backup['children'][] = $container_backup;
+		else
+			$client_backup['children'][] = $container_backup;
 	}
 	$usage = 0;
 	foreach ($client_backup['children'] as $cid => $cdata)
