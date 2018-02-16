@@ -16,11 +16,23 @@ $new_dir = [
 	'path' => '',
 	'children' => []
 ];
+$repos = [];
 $db = get_module_db($module);
-$repos = [
-	['name' => 'OpenVZ', 'username' => SWIFT_OPENVZ_USER, 'password' => SWIFT_OPENVZ_PASS],
-	['name' => 'KVM', 'username' => SWIFT_KVM_USER, 'password' => SWIFT_KVM_PASS]
-];
+$json = $sw->list_accounts();
+foreach ($json['accounts'] as $account_idx => $account_data) {
+	$repo = [];
+	if ($account_data['name'] == 'openvz')
+		$repo['name'] = 'OpenVZ';
+	elseif ($account_data['name'] == 'kvm')
+		$repo['name'] = 'KVM';
+	else
+		$repo['name'] = trim(ucwords($account_data['name']));
+	$users_data = $sw->list_account($account_data['name']);	
+	$repo['username'] = $account_data['name'].':'.$users_data['users'][0]['name'];
+	$user_data = $sw->list_user($account_data['name'], $users_data['users'][0]['name']);
+	$repo['password'] = str_replace('plaintext:', '', $user_data['auth']);
+	$repos[] = $repo;
+}
 $quick = true;
 if ($_SERVER['argv'][1] == 'no')
 	$quick = false;
@@ -33,19 +45,13 @@ foreach ($repos as $repo) {
 	$response = $sw->authenticate($repo['username'], $repo['password']);
 	$usage = $sw->usage();
 	$repo_backup['value'] = (int)$usage['X-Account-Bytes-Used'];
-	$host_backup = $new_dir;
-	$client_backup = $new_dir;
-	$host_backup['name'] = 'Hosts';
-	$host_backup['path'] = $repo['name'].'/Hosts';
-	$client_backup['name'] = 'Clients';
-	$client_backup['path'] = $repo['name'].'/Clients';
+	echo "{$repo['name']} Got {$repo_backup['value']} bytes in backups\n";
 	$ls_output = explode("\n", trim($sw->ls()));
 	foreach ($ls_output as $container) {
 		$container_backup = $quick == FALSE ? $new_dir : $new_file;
 		$container_backup['name'] = $container;
-		$type = preg_match('/^vps/', $container) ? 'Clients' : 'Hosts';
-		echo "Processing {$repo['name']} {$type} container '$container'\n";
-		$container_backup['path'] = $repo['name'].'/'.$type.'/'.$container;
+		echo "Processing {$repo['name']} container '$container'\n";
+		$container_backup['path'] = $repo['name'].'/'.$container;
 		$usage = $sw->usage($container);
 		$container_backup['value'] = (int)$usage['X-Container-Bytes-Used'];
 		if ($quick == FALSE) {
@@ -55,31 +61,18 @@ foreach ($repos as $repo) {
 					echo "Processing '$filedir' in $container\n";
 					$file_backup = $new_file;
 					$file_backup['name'] = $filedir;
-					$file_backup['path'] = $repo['name'].'/'.$type.'/'.$container.'/'.$filedir;
+					$file_backup['path'] = $repo['name'].'/'.$container.'/'.$filedir;
 					$usage = $sw->usage($container.'/'.$filedir);
 					$file_backup['value'] = (int)$usage['Content-Length'];
 					$container_backup['children'][] = $file_backup;
 				}
 			}
 		}
-		if ($type == 'Hosts')
-			$host_backup['children'][] = $container_backup;
-		else
-			$client_backup['children'][] = $container_backup;
+		$repo_backup['children'][] = $container_backup;
 	}
-	$usage = 0;
-	foreach ($client_backup['children'] as $cid => $cdata)
-		$usage += $cdata['value'];
-	$client_backup['value'] = (int)$usage;
-	$usage = 0;
-	foreach ($host_backup['children'] as $cid => $cdata)
-		$usage += $cdata['value'];
-	$host_backup['value'] = (int)$usage;
-	echo "{$repo['name']} Got {$host_backup['value']} bytes in Host backups and {$client_backup['value']} bytes in Client backups\n";
-	$repo_backup['children'][] = $host_backup;
-	$repo_backup['children'][] = $client_backup;
 	$backups[] = $repo_backup;
 }
 $file = $quick == TRUE ? 'swift_quick_usage.json' : 'swift_usage.json';
 file_put_contents($file, str_replace("\\/", '/', json_encode($backups, JSON_PRETTY_PRINT)));
 echo "Wrote {$file}\n";
+
