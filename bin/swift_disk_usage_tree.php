@@ -72,7 +72,7 @@ foreach ($repos as $repo) {
 	}
 	$backups[] = $repo_backup;
 }
-$file = $quick == TRUE ? 'swift_quick_usage.json' : 'swift_usage.json';
+$file = 'swift_usage.json';
 file_put_contents(__DIR__.'/../../../../public_html/admin/'.$file, str_replace("\\/", '/', json_encode($backups, JSON_PRETTY_PRINT)));
 echo "Wrote {$file}\n";
 
