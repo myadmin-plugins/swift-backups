@@ -1,4 +1,4 @@
-#!/usr/bin/php -q
+#!/usr/bin/env php -q
 <?php
 require_once __DIR__.'/../../../../include/functions.inc.php';
 function_requirements('class.Swift');
