@@ -3,8 +3,7 @@
 /**
  * Class Swift
  */
-class Swift
-{
+class Swift {
 	/**
 	 * @var string
 	 */

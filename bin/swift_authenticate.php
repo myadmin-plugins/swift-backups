@@ -5,8 +5,7 @@ function_requirements('class.Swift');
 $sw = new Swift;
 //$response = $sw->authenticate(SWIFT_MY_USER,SWIFT_MY_PASS);
 $response = $sw->authenticate(SWIFT_OPENVZ_USER, SWIFT_OPENVZ_PASS);
-if ($response === false)
-{
+if ($response === false) {
 	echo "Problems\n";
 	exit;
 }
