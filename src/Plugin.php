@@ -9,8 +9,8 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  *
  * @package Detain\MyAdminSwift
  */
-class Plugin {
-
+class Plugin
+{
 	public static $name = 'Swift Plugin';
 	public static $description = 'Allows handling of Swift based Backups';
 	public static $help = '';
@@ -19,13 +19,15 @@ class Plugin {
 	/**
 	 * Plugin constructor.
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 	}
 
 	/**
 	 * @return array
 	 */
-	public static function getHooks() {
+	public static function getHooks()
+	{
 		return [
 			'system.settings' => [__CLASS__, 'getSettings'],
 			//'ui.menu' => [__CLASS__, 'getMenu'],
@@ -36,19 +38,22 @@ class Plugin {
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-	public static function getMenu(GenericEvent $event) {
+	public static function getMenu(GenericEvent $event)
+	{
 		$menu = $event->getSubject();
 		if ($GLOBALS['tf']->ima == 'admin') {
 			function_requirements('has_acl');
-					if (has_acl('client_billing'))
-							$menu->add_link('admin', 'choice=none.abuse_admin', '/lib/webhostinghub-glyphs-icons/icons/development-16/Black/icon-spam.png', 'Swift');
+			if (has_acl('client_billing')) {
+				$menu->add_link('admin', 'choice=none.abuse_admin', '/lib/webhostinghub-glyphs-icons/icons/development-16/Black/icon-spam.png', 'Swift');
+			}
 		}
 	}
 
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-	public static function getRequirements(GenericEvent $event) {
+	public static function getRequirements(GenericEvent $event)
+	{
 		$loader = $event->getSubject();
 		$loader->add_requirement('class.Swift', '/../vendor/detain/myadmin-swift-backups/src/Swift.php');
 	}
@@ -56,12 +61,12 @@ class Plugin {
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-	public static function getSettings(GenericEvent $event) {
+	public static function getSettings(GenericEvent $event)
+	{
 		$settings = $event->getSubject();
 		$settings->add_text_setting('Backups', 'Swift', 'swift_auth_url', 'Swift Auth URL:', 'Swift Auth URL', SWIFT_AUTH_URL);
 		$settings->add_text_setting('Backups', 'Swift', 'swift_auth_v1_url', 'Swift Auth v1 URL:', 'Swift Auth v1 URL', SWIFT_AUTH_V1_URL);
 		$settings->add_text_setting('Backups', 'Swift', 'swift_admin_user', 'Swift Admin User:', 'Swift Admin User', SWIFT_ADMIN_USER);
 		$settings->add_text_setting('Backups', 'Swift', 'swift_admin_key', 'Swift Admin Key:', 'Swift Admin Key', SWIFT_ADMIN_KEY);
 	}
-
 }

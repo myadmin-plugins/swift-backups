@@ -21,21 +21,23 @@ $db = get_module_db($module);
 $json = $sw->list_accounts();
 foreach ($json['accounts'] as $account_idx => $account_data) {
 	$repo = [];
-	if ($account_data['name'] == 'openvz')
+	if ($account_data['name'] == 'openvz') {
 		$repo['name'] = 'OpenVZ';
-	elseif ($account_data['name'] == 'kvm')
+	} elseif ($account_data['name'] == 'kvm') {
 		$repo['name'] = 'KVM';
-	else
+	} else {
 		$repo['name'] = trim(ucwords($account_data['name']));
-	$users_data = $sw->list_account($account_data['name']);	
+	}
+	$users_data = $sw->list_account($account_data['name']);
 	$repo['username'] = $account_data['name'].':'.$users_data['users'][0]['name'];
 	$user_data = $sw->list_user($account_data['name'], $users_data['users'][0]['name']);
 	$repo['password'] = str_replace('plaintext:', '', $user_data['auth']);
 	$repos[] = $repo;
 }
 $quick = true;
-if ($_SERVER['argv'][1] == 'no')
+if ($_SERVER['argv'][1] == 'no') {
 	$quick = false;
+}
 $backups = [];
 foreach ($repos as $repo) {
 	echo "Processing repo {$repo['name']}\n";
@@ -48,13 +50,13 @@ foreach ($repos as $repo) {
 	echo "{$repo['name']} Got {$repo_backup['value']} bytes in backups\n";
 	$ls_output = explode("\n", trim($sw->ls()));
 	foreach ($ls_output as $container) {
-		$container_backup = $quick == FALSE ? $new_dir : $new_file;
+		$container_backup = $quick == false ? $new_dir : $new_file;
 		$container_backup['name'] = $container;
 		echo "Processing {$repo['name']} container '$container'\n";
 		$container_backup['path'] = $repo['name'].'/'.$container;
 		$usage = $sw->usage($container);
 		$container_backup['value'] = (int)$usage['X-Container-Bytes-Used'];
-		if ($quick == FALSE) {
+		if ($quick == false) {
 			$ls_vps_output = explode("\n", trim($sw->ls($container)));
 			foreach ($ls_vps_output as $filedir) {
 				if (preg_match('/\//', $filedir)) {
@@ -75,4 +77,3 @@ foreach ($repos as $repo) {
 $file = 'swift_usage.json';
 file_put_contents(__DIR__.'/../../../../public_html/admin/'.$file, str_replace("\\/", '/', json_encode($backups, JSON_PRETTY_PRINT)));
 echo "Wrote {$file}\n";
-

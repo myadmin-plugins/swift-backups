@@ -3,7 +3,8 @@
 /**
  * Class Swift
  */
-class Swift {
+class Swift
+{
 	/**
 	 * @var string
 	 */
@@ -40,7 +41,8 @@ class Swift {
 	/**
 	 *
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		$this->options = [
 			CURLOPT_HTTPGET => true,
 			CURLOPT_HTTPHEADER => ['X-Auth-Admin-User:'.$this->admin_user, 'X-Auth-Admin-Key:'.$this->auth_key],
@@ -55,11 +57,14 @@ class Swift {
 	 * @param bool|string $password
 	 * @return array|bool
 	 */
-	public function authenticate($username = false, $password = false, $retry = 10) {
-		if ($username === false)
+	public function authenticate($username = false, $password = false, $retry = 10)
+	{
+		if ($username === false) {
 			$username = $this->admin_user.':'.$this->admin_user;
-		if ($password === false)
+		}
+		if ($password === false) {
 			$password = $this->auth_key;
+		}
 		$options = [
 			CURLOPT_HTTPGET => true,
 			CURLOPT_HEADER => true,
@@ -73,41 +78,49 @@ class Swift {
 			$try++;
 			//echo "{$this->v1_auth_url} Authenticate Attempt {$try}\n";
 			$response = getcurlpage($this->v1_auth_url, '', $options);
-			if (preg_match_all('/^X\-Storage\-\w+: .*$/m', $response))
+			if (preg_match_all('/^X\-Storage\-\w+: .*$/m', $response)) {
 				break;
+			}
 			//echo "Response: $response\n";
 		}
 		$lines = explode("\n", $response);
 		$this->storage_url = false;
 		$this->storage_token = false;
 		foreach ($lines as $line) {
-			if (preg_match('/^X\-Storage\-Url\: (.*)$/', $line, $matches))
+			if (preg_match('/^X\-Storage\-Url\: (.*)$/', $line, $matches)) {
 				$this->storage_url = trim($matches[1]);
-			if (preg_match('/^X-Storage-Token: (.*)$/', $line, $matches))
+			}
+			if (preg_match('/^X-Storage-Token: (.*)$/', $line, $matches)) {
 				$this->storage_token = trim($matches[1]);
-			if ($this->storage_token !== false && $this->storage_url !== false)
+			}
+			if ($this->storage_token !== false && $this->storage_url !== false) {
 				break;
+			}
 		}
-		if ($this->storage_token === false && $this->storage_url === false)
+		if ($this->storage_token === false && $this->storage_url === false) {
 			return false;
+		}
 		return [$this->storage_url, $this->storage_token];
 	}
 
 	/**
 	 * @return string
 	 */
-	public function get_url() {
+	public function get_url()
+	{
 		return $this->storage_url;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function get_token() {
+	public function get_token()
+	{
 		return $this->storage_token;
 	}
 
-	public function set_v1_auth_url($url) {
+	public function set_v1_auth_url($url)
+	{
 		$this->v1_auth_url = $url;
 	}
 
@@ -117,10 +130,12 @@ class Swift {
 	 * @param string $write
 	 * @return array|string
 	 */
-	public function acl($container = '', $read = '', $write = '') {
+	public function acl($container = '', $read = '', $write = '')
+	{
 		$container = trim($container);
-		if ($container == '')
+		if ($container == '') {
 			return false;
+		}
 		$options = [
 			//CURLOPT_HEADER => true,
 			//CURLOPT_NOBODY => true,
@@ -129,10 +144,12 @@ class Swift {
 			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_CUSTOMREQUEST => 'PUT'
 		];
-		if ($read != '')
+		if ($read != '') {
 			$options[CURLOPT_HTTPHEADER][] = 'X-Container-Read: '.$read;
-		if ($write != '')
+		}
+		if ($write != '') {
 			$options[CURLOPT_HTTPHEADER][] = 'X-Container-Write: '.$write;
+		}
 		//print_r($options);echo '<br>';
 		$response = getcurlpage($this->storage_url.'/'.$container, '', $options);
 		myadmin_log('backups', 'info', $response, __LINE__, __FILE__);
@@ -157,7 +174,8 @@ class Swift {
 	 * @param string $container
 	 * @return array|string
 	 */
-	public function usage($container = '') {
+	public function usage($container = '')
+	{
 		$options = [
 			CURLOPT_HEADER => true,
 			CURLOPT_NOBODY => true,
@@ -185,7 +203,8 @@ class Swift {
 	/**
 	 * @param string $container
 	 */
-	public function download_passthrough($container = '') {
+	public function download_passthrough($container = '')
+	{
 		$options = [
 			CURLOPT_RETURNTRANSFER => false,
 			CURLOPT_HTTPHEADER => ['X-Auth-Token:'.$this->storage_token],
@@ -200,7 +219,8 @@ class Swift {
 	 * @param $filename
 	 * @return string
 	 */
-	public function upload($container, $filename) {
+	public function upload($container, $filename)
+	{
 		$options = [
 			CURLOPT_HTTPGET => true,
 			CURLOPT_HTTPHEADER => [
@@ -212,10 +232,11 @@ class Swift {
 			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_CUSTOMREQUEST => 'PUT'
 		];
-		if (isset($_SERVER['HTTP_X_FILE_NAME']))
+		if (isset($_SERVER['HTTP_X_FILE_NAME'])) {
 			$dest_filename = $_SERVER['HTTP_X_FILE_NAME'];
-		else
+		} else {
 			$dest_filename = $filename;
+		}
 		$postfields = '@'.$filename;
 		$response = getcurlpage($this->storage_url.'/'.$container.'/'.$dest_filename, '', $options);
 		return $response;
@@ -225,7 +246,8 @@ class Swift {
 	 * @param $container
 	 * @return string
 	 */
-	public function delete($container) {
+	public function delete($container)
+	{
 		$options = [
 			CURLOPT_HTTPGET => true,
 			CURLOPT_HTTPHEADER => ['X-Auth-Token:'.$this->storage_token],
@@ -242,7 +264,8 @@ class Swift {
 	 * @param string $container
 	 * @return string
 	 */
-	public function ls($container = '') {
+	public function ls($container = '')
+	{
 		$options = [
 			CURLOPT_HTTPGET => true,
 			CURLOPT_HTTPHEADER => ['X-Auth-Token:'.$this->storage_token],
@@ -257,7 +280,8 @@ class Swift {
 	 * @param string $container
 	 * @return string
 	 */
-	public function ls_header($container = '') {
+	public function ls_header($container = '')
+	{
 		$options = [
 			CURLOPT_HTTPGET => true,
 			CURLOPT_HEADER => true,
@@ -272,18 +296,20 @@ class Swift {
 	/**
 	 * @return mixed
 	 */
-	public function list_accounts() {
+	public function list_accounts()
+	{
 		$response = getcurlpage($this->auth_url, $this->args, $this->options);
-		return json_decode($response, TRUE);
+		return json_decode($response, true);
 	}
 
 	/**
 	 * @param $account
 	 * @return mixed
 	 */
-	public function list_account($account) {
+	public function list_account($account)
+	{
 		$response = getcurlpage($this->auth_url . $account, $this->args, $this->options);
-		return json_decode($response, TRUE);
+		return json_decode($response, true);
 	}
 
 	/**
@@ -291,9 +317,10 @@ class Swift {
 	 * @param $user
 	 * @return mixed
 	 */
-	public function list_user($account, $user) {
+	public function list_user($account, $user)
+	{
 		$response = getcurlpage($this->auth_url . $account.'/'.$user, $this->args, $this->options);
-		return json_decode($response, TRUE);
+		return json_decode($response, true);
 	}
 
 	/*
@@ -886,5 +913,4 @@ class Swift {
 	fi
 	}
 	*/
-
 }

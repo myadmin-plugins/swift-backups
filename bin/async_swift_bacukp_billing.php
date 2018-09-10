@@ -6,10 +6,12 @@ use React\Socket\Connector;
 
 require_once __DIR__.'/../../../../include/functions.inc.php';
 
-function new_client_request($type, $repo_name, $container = '') {
+function new_client_request($type, $repo_name, $container = '')
+{
 	global $repos, $retry, $client;
-	if (!isset($retry["{$type}{$repo_name}{$container}"]))
+	if (!isset($retry["{$type}{$repo_name}{$container}"])) {
 		$retry["{$type}{$repo_name}{$container}"] = 0;
+	}
 	$request = $client->request('GET', $repos[$type][$repo_name]['url'].'/'.$container, ['X-Auth-Token' => $repos[$type][$repo_name]['token']]);
 	$request->on('response', function (Response $response) use ($type, $repo_name, $container) {
 		global $repos, $retry, $client;
@@ -22,8 +24,9 @@ function new_client_request($type, $repo_name, $container = '') {
 					$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
 					new_client_request($type, $repo_name, $container);
 				}
-			} else
+			} else {
 				echo $type.' '.$repo_name.' '.$container.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' DATA Length:'.strlen($chunk).PHP_EOL;
+			}
 			$repos[$type][$repo_name]['usage'][$container] .= $chunk;
 		});
 		$response->on('end', function () use ($type, $repo_name, $container) {
@@ -103,12 +106,13 @@ foreach ($repos as $type => $type_repos) {
 			$retry["{$type}{$repo_name}"] = $retry["{$type}{$repo_name}"] + 1;
 			$sw = $repos[$type][$repo_name]['sw'];
 			$response = $sw->ls();
-			if ($response === FALSE)
+			if ($response === false) {
 				echo 'Got odd response:'.var_export($response, true).PHP_EOL;
-			else
+			} else {
 				$repos[$type][$repo_name]['ls'] = $response;
+			}
 		}
-		if ($response !== FALSE) {
+		if ($response !== false) {
 			$repos[$type][$repo_name]['ls'] = explode("\n", trim($response));
 			echo "Loaded ".sizeof($repos[$type][$repo_name]['ls'])." Entries for ".$type.' '.$repo_name.PHP_EOL;
 			$repos[$type][$repo_name]['usage'] = [];
