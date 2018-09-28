@@ -55,7 +55,7 @@ class Plugin
 	public static function getRequirements(GenericEvent $event)
 	{
 		$loader = $event->getSubject();
-		$loader->add_requirement('class.Swift', '/../vendor/detain/swift-backups/src/Swift.php');
+		$loader->add_requirement('class.Swift', '/../vendor/detain/myadmin-swift-backups/src/Swift.php');
 	}
 
 	/**
