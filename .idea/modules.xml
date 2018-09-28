@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/myadmin-swift-backups.iml" filepath="$PROJECT_DIR$/.idea/myadmin-swift-backups.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/swift-backups.iml" filepath="$PROJECT_DIR$/.idea/swift-backups.iml" />
     </modules>
   </component>
 </project>

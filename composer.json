@@ -1,5 +1,5 @@
 {
-	"name": "detain/myadmin-swift-backups",
+	"name": "detain/swift-backups",
 	"type": "myadmin-plugin",
 	"description": "Swift handling plugin for MyAdmin",
 	"keywords": [
