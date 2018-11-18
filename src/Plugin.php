@@ -69,9 +69,9 @@ class Plugin
          * @var \MyAdmin\Settings $settings
          **/
         $settings = $event->getSubject();
-		$settings->add_text_setting(__('Backups'), __('Swift'), 'swift_auth_url', __('Swift Auth URL'), __('Swift Auth URL'), SWIFT_AUTH_URL);
-		$settings->add_text_setting(__('Backups'), __('Swift'), 'swift_auth_v1_url', __('Swift Auth v1 URL'), __('Swift Auth v1 URL'), SWIFT_AUTH_V1_URL);
-		$settings->add_text_setting(__('Backups'), __('Swift'), 'swift_admin_user', __('Swift Admin User'), __('Swift Admin User'), SWIFT_ADMIN_USER);
-		$settings->add_text_setting(__('Backups'), __('Swift'), 'swift_admin_key', __('Swift Admin Key'), __('Swift Admin Key'), SWIFT_ADMIN_KEY);
+		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_auth_url', _('Swift Auth URL'), _('Swift Auth URL'), SWIFT_AUTH_URL);
+		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_auth_v1_url', _('Swift Auth v1 URL'), _('Swift Auth v1 URL'), SWIFT_AUTH_V1_URL);
+		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_admin_user', _('Swift Admin User'), _('Swift Admin User'), SWIFT_ADMIN_USER);
+		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_admin_key', _('Swift Admin Key'), _('Swift Admin Key'), SWIFT_ADMIN_KEY);
 	}
 }
