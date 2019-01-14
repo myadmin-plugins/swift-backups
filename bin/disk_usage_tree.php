@@ -66,7 +66,7 @@ foreach ($repos as $repo) {
 	$response = $sw->authenticate($repo['username'], $repo['password']);
 	$usage = $sw->usage();
 	$repo_backup['value'] = (int)$usage['X-Account-Bytes-Used'];
-	echo "{$repo['name']} Got {$repo_backup['value']} bytes in backups\n";
+	echo "{$repo['name']} Got ".Scale($repo_backup['value'])." in backups\n";
 	$total = bcadd($repo_backup['value'], $total);
 	if ($detail != 'repo') {
 		$ls_output = explode("\n", trim($sw->ls()));
@@ -97,5 +97,5 @@ foreach ($repos as $repo) {
 	$backups[] = $repo_backup;
 }
 file_put_contents(__DIR__.'/../../../../public_html/admin/swift_usage.json', str_replace("\\/", '/', json_encode($backups, JSON_PRETTY_PRINT)));
-echo "Got Total Size ${total}\n";
+echo "Got Total Size ".Scale($total)."\n";
 echo "Wrote swift_usage.json\n";
