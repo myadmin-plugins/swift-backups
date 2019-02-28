@@ -44,7 +44,7 @@ foreach ($repos as $repo) {
 					$backups[] = $vps[$settings['PREFIX'].'_id'].':'.$match;
 					$sizes[$id.':'.$match] = $usage['Content-Length'];
 					if (!is_numeric($usage['Content-Length'])) {
-						myadmin_log('scripts', 'info', "{$vps['vps_hostname']} {$match} invalid content length " .var_export($usage, true), __LINE__, __FILE__);
+						myadmin_log('scripts', 'info', "{$vps['vps_hostname']} {$match} invalid content length " .var_export($usage, true), __LINE__, __FILE__, $module);
 					} else {
 						$used_gb = round((isset($usage['Content-Length']) ? $usage['Content-Length'] : 0) / 1024 / 1024 / 1024, 2);
 						//echo "{$vps['vps_hostname']} {$match} {$used_gb} GB\n";
