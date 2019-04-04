@@ -157,7 +157,9 @@ class Swift
 		preg_match_all('/^(.*): (.*)$/m', $response, $matches);
 		$response = [];
 		foreach ($matches[1] as $idx => $key) {
-			if (!in_array($key, [
+			if (!in_array(
+				$key,
+				[
 				'Accept-Ranges',
 				'X-Trans-Id',
 				'Date'
@@ -187,7 +189,9 @@ class Swift
 		preg_match_all('/^(.*): (.*)$/m', $response, $matches);
 		$response = [];
 		foreach ($matches[1] as $idx => $key) {
-			if (!in_array($key, [
+			if (!in_array(
+				$key,
+				[
 				'Accept-Ranges',
 				'X-Trans-Id',
 				'Date'

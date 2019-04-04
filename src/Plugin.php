@@ -43,8 +43,8 @@ class Plugin
 		$menu = $event->getSubject();
 		if ($GLOBALS['tf']->ima == 'admin') {
 			function_requirements('has_acl');
-            if (has_acl('client_billing')) {
-            }
+			if (has_acl('client_billing')) {
+			}
 		}
 	}
 
@@ -53,22 +53,22 @@ class Plugin
 	 */
 	public static function getRequirements(GenericEvent $event)
 	{
-        /**
-         * @var \MyAdmin\Plugins\Loader $this->loader
-         */
-        $loader = $event->getSubject();
+		/**
+		 * @var \MyAdmin\Plugins\Loader $this->loader
+		 */
+		$loader = $event->getSubject();
 		$loader->add_requirement('class.Swift', '/../vendor/detain/myadmin-swift-backups/src/Swift.php');
 	}
 
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-    public static function getSettings(GenericEvent $event)
-    {
-        /**
-         * @var \MyAdmin\Settings $settings
-         **/
-        $settings = $event->getSubject();
+	public static function getSettings(GenericEvent $event)
+	{
+		/**
+		 * @var \MyAdmin\Settings $settings
+		 **/
+		$settings = $event->getSubject();
 		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_auth_url', _('Swift Auth URL'), _('Swift Auth URL'), SWIFT_AUTH_URL);
 		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_auth_v1_url', _('Swift Auth v1 URL'), _('Swift Auth v1 URL'), SWIFT_AUTH_V1_URL);
 		$settings->add_text_setting(_('Backups'), _('Swift'), 'swift_admin_user', _('Swift Admin User'), _('Swift Admin User'), SWIFT_ADMIN_USER);
