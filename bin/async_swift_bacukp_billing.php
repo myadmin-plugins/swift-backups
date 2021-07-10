@@ -1,8 +1,8 @@
 <?php
 
-use React\HttpClient\Client;
-use React\HttpClient\Response;
-use React\Socket\Connector;
+use React\Http\Browser;
+use Psr\Http\Message\ResponseInterface;
+
 
 require_once __DIR__.'/../../../../include/functions.inc.php';
 
@@ -12,37 +12,28 @@ function new_client_request($type, $repo_name, $container = '')
 	if (!isset($retry["{$type}{$repo_name}{$container}"])) {
 		$retry["{$type}{$repo_name}{$container}"] = 0;
 	}
-	$request = $client->request('GET', $repos[$type][$repo_name]['url'].'/'.$container, ['X-Auth-Token' => $repos[$type][$repo_name]['token']]);
-	$request->on('response', function (Response $response) use ($type, $repo_name, $container) {
+	$request = $client->get($repos[$type][$repo_name]['url'].'/'.$container, ['X-Auth-Token' => $repos[$type][$repo_name]['token']])->then(function (ResponseInterface $response)  use ($type, $repo_name, $container) {
 		global $repos, $retry, $client;
-		$response->on('data', function ($chunk) use ($type, $repo_name, $container, $response) {
-			global $repos, $retry, $client;
-			$headers = $response->getHeaders();
-			if (!isset($headers['X-Trans-Id'])) {
-				if ($retry["{$type}{$repo_name}{$container}"] < 5) {
-					echo "Retrying {$type} {$repo_name} {$container}\n";
-					$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
-					new_client_request($type, $repo_name, $container);
-				}
-			} else {
-				echo $type.' '.$repo_name.' '.$container.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' DATA Length:'.strlen($chunk).PHP_EOL;
+		$headers = $response->getHeaders();
+		$body = (string)$response->getBody();
+		if (!isset($headers['X-Trans-Id'])) {
+			if ($retry["{$type}{$repo_name}{$container}"] < 5) {
+				echo "Retrying {$type} {$repo_name} {$container}\n";
+				$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
+				new_client_request($type, $repo_name, $container);
 			}
-			$repos[$type][$repo_name]['usage'][$container] .= $chunk;
-		});
-		$response->on('end', function () use ($type, $repo_name, $container) {
-			global $repos, $retry, $client;
-			//echo $type.' '.$repo_name.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' '.$container.' DONE' . PHP_EOL;
-		});
-	});
-	$request->on('error', function (\Exception $e) use ($type, $repo_name, $container) {
+		} else {
+			echo $type.' '.$repo_name.' '.$container.' Attempt #'.$retry["{$type}{$repo_name}{$container}"].' DATA Length:'.strlen($body).PHP_EOL;
+		}
+		$repos[$type][$repo_name]['usage'][$container] .= $body;
+	}, function (\Exception $error) {
 		global $repos, $retry, $client;
-		echo 'Error Occurred Attempt #'.$retry["{$type}{$repo_name}{$container}"].' with '.$type.' '.$repo_name.' '.$container.':'.$e->getMessage().PHP_EOL;
+		echo 'Error Occurred Attempt #'.$retry["{$type}{$repo_name}{$container}"].' with '.$type.' '.$repo_name.' '.$container.':'.$error->getMessage().PHP_EOL;
 		if ($retry["{$type}{$repo_name}{$container}"] < 5) {
 			$retry["{$type}{$repo_name}{$container}"] = $retry["{$type}{$repo_name}{$container}"] + 1;
 			new_client_request($type, $repo_name, $container);
 		}
-	});
-	$request->end();
+    });
 	return $request;
 }
 
@@ -84,8 +75,7 @@ $sum_used_gb = 0;
 $sum_chargable_gb = 0;
 $sum_chargable_amount = 0;
 $loop = React\EventLoop\Factory::create();
-$connector = new Connector($loop, ['timeout' => $timeout]);
-$client = new Client($loop, $connector);
+$client = new Browser($loop);
 $start = time();
 echo 'Starting to Authenticate and build Requests at '.$start.PHP_EOL;
 foreach ($repos as $type => $type_repos) {
