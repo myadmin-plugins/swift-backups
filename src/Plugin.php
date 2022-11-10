@@ -72,6 +72,6 @@ class Plugin
         $settings->add_text_setting(_('Backups'), _('Swift'), 'swift_auth_url', _('Swift Auth URL'), _('Swift Auth URL'), SWIFT_AUTH_URL);
         $settings->add_text_setting(_('Backups'), _('Swift'), 'swift_auth_v1_url', _('Swift Auth v1 URL'), _('Swift Auth v1 URL'), SWIFT_AUTH_V1_URL);
         $settings->add_text_setting(_('Backups'), _('Swift'), 'swift_admin_user', _('Swift Admin User'), _('Swift Admin User'), SWIFT_ADMIN_USER);
-        $settings->add_text_setting(_('Backups'), _('Swift'), 'swift_admin_key', _('Swift Admin Key'), _('Swift Admin Key'), SWIFT_ADMIN_KEY);
+        $settings->add_password_setting(_('Backups'), _('Swift'), 'swift_admin_key', _('Swift Admin Key'), _('Swift Admin Key'), SWIFT_ADMIN_KEY);
     }
 }
