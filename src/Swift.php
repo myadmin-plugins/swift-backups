@@ -276,8 +276,15 @@ class Swift
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false
         ];
-        $response = getcurlpage($this->storage_url.'/'.$container, '', $options);
-        return $response;
+        $response = trim(getcurlpage($this->storage_url.'/'.$container, '', $options));
+        $return = $response;
+        $lines = explode("\n", $response);
+        while (count($lines) == 10000) {
+            $response = trim(getcurlpage($this->storage_url.'/'.$container.'?marker='.$lines[9999], '', $options));
+            $return .= "\n".$response;
+            $lines = explode("\n", $response);
+        }
+        return $return;
     }
 
     /**
