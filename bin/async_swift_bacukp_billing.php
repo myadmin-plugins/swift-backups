@@ -83,7 +83,7 @@ foreach ($repos as $type => $type_repos) {
         $sw = new Swift();
         $sw->set_v1_auth_url('http://storage-nj.interserver.net/auth/v1.0');
         $response = $sw->authenticate($repo['username'], $repo['password'], 10);
-        list($storage_url, $storage_token) = $response;
+        [$storage_url, $storage_token] = $response;
         $storage_url = str_replace('https://storage-nj2.interserver.net/', 'http://storage-nj.interserver.net/', $storage_url);
         echo $type.' '.$repo_name.' Storage URL:'.$storage_url.' and Token:'.$storage_token.PHP_EOL;
         $repos[$type][$repo_name]['sw'] = $sw;
