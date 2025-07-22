@@ -152,7 +152,7 @@ class Swift
         }
         //print_r($options);echo '<br>';
         $response = getcurlpage($this->storage_url.'/'.$container, '', $options);
-        myadmin_log('backups', 'info', $response, __LINE__, __FILE__);
+        //myadmin_log('backups', 'info', $response, __LINE__, __FILE__);
         //echo 'Response:<br>'.$response  . "<br>";
         preg_match_all('/^(.*): (.*)$/m', $response, $matches);
         $response = [];
