@@ -206,6 +206,19 @@ class Swift
 
     /**
      * @param string $container
+     * @return string file contents
+     */
+    public function download($container) {
+        $options = [
+            CURLOPT_HTTPHEADER => ['X-Auth-Token:'.$this->storage_token],
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false
+        ];
+        return  getcurlpage($this->storage_url.'/'.$container, '', $options);
+    }
+
+    /**
+     * @param string $container
      */
     public function download_passthrough($container = '')
     {
