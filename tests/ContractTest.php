@@ -37,6 +37,20 @@ use MyAdmin\Plugins\Testing\PluginContractTestCase;
  * emptied getHooks() would leave the shared suite green. The pin below is the part
  * only this repo can state: which hooks this plugin is supposed to register, and that
  * $type still selects the assertions intended for it.
+ *
+ * ---------------------------------------------------------------------------------
+ * WHY THIS CLASS RUNS IN ITS OWN PROCESS
+ * ---------------------------------------------------------------------------------
+ * Inspecting a plugin defines real constants and calls register_module(). PHP cannot
+ * undefine a constant and register_module() has no inverse, so this class cannot be
+ * unwound once it has run: whatever executes after it in the same process sees primed
+ * constants and a registered module it did not ask for. That is why the fleet matrix
+ * generator spawns one process per package, and it is why this class is isolated here
+ * -- without it, adding this file would change the outcome of the tests that were
+ * already in this repo, which is precisely what an additive conversion must not do.
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class ContractTest extends PluginContractTestCase
 {
