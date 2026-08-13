@@ -1,6 +1,6 @@
 ---
 name: plugin-hook
-description: Adds or modifies event hooks in `src/Plugin.php` using Symfony `GenericEvent` and the `getHooks()` registry. Covers `system.settings` text/password settings and `function.requirements` loader patterns. Use when user says 'add setting', 'register hook', 'new plugin event', or edits `src/Plugin.php`. Do NOT use for `src/Swift.php` or `bin/` changes. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Adds or modifies event hooks in `src/Plugin.php` using Symfony `GenericEvent` and the `getHooks()` registry. Covers `system.settings` text/password settings and `function.requirements` loader patterns. Use when user says 'add setting', 'register hook', 'new plugin event', or edits `src/Plugin.php`. Do NOT use for `src/Swift.php` or `bin/` changes. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file

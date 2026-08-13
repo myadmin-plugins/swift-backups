@@ -1,6 +1,6 @@
 ---
 name: swift-api-method
-description: Adds a new method to `src/Swift.php` following the cURL options pattern. Sets up `CURLOPT_HTTPHEADER` with `X-Auth-Token`, disables SSL verify, calls `getcurlpage()`, and parses the response. Use when user says 'add Swift method', 'new container operation', 'add endpoint to Swift', or modifies `src/Swift.php`. Do NOT use for bin scripts or Plugin hook changes. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Adds a new method to `src/Swift.php` following the cURL options pattern. Sets up `CURLOPT_HTTPHEADER` with `X-Auth-Token`, disables SSL verify, calls `getcurlpage()`, and parses the response. Use when user says 'add Swift method', 'new container operation', 'add endpoint to Swift', or modifies `src/Swift.php`. Do NOT use for bin scripts or Plugin hook changes. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file

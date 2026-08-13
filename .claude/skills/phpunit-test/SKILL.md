@@ -1,6 +1,6 @@
 ---
 name: phpunit-test
-description: Writes PHPUnit 9.6 tests under `tests/` in the `Detain\MyAdminSwift\Tests` namespace. Use when user says 'write tests', 'add test coverage', 'PHPUnit', or creates files in `tests/`. Covers structural assertions via ReflectionClass and anonymous-class stubs for dependency injection. Do NOT trigger for production code changes in `src/` or `bin/`. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Writes PHPUnit 9.6 tests under `tests/` in the `Detain\MyAdminSwift\Tests` namespace. Use when user says 'write tests', 'add test coverage', 'PHPUnit', or creates files in `tests/`. Covers structural assertions via ReflectionClass and anonymous-class stubs for dependency injection. Do NOT trigger for production code changes in `src/` or `bin/`. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file
