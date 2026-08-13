@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Detain\MyAdminSwift\Tests;
 
 use Detain\MyAdminSwift\Plugin;
+use MyAdmin\Plugins\Testing\Contract\TierA5HooksAreIdempotent;
 use MyAdmin\Plugins\Testing\PluginContractTestCase;
 
 /**
@@ -71,24 +72,41 @@ class ContractTest extends PluginContractTestCase
      */
     public function testRegistersItsIdentityAndHooks(): void
     {
+        // Prime FIRST, before anything touches the plugin class. A static property
+        // initializer may itself reference a bare constant -- $settings holding
+        // REPEAT_BILLING_METHOD => PRORATE_BILLING is the common shape -- and that is
+        // evaluated when the class loads, so even reading ::$type fatals on an unprimed
+        // class. Priming before the first mention is what keeps this pin readable.
+        $this->primeConstants();
+
         $this->assertSame(
             'plugin',
             Plugin::$type,
             'changing $type silently changes which contract assertions apply'
         );
 
-        $this->primeConstants();
+        // Read the table the way every inspector reads it. Calling getHooks() directly here
+        // would be a second, independent answer to "can this plugin's hook table be
+        // evaluated?" -- and a plugin whose getHooks() body references a bare constant
+        // (PRORATE_BILLING and friends) throws for a direct caller while the inspectors
+        // handle it. A-5 owns that question; this pin consumes its answer.
+        $hooks = TierA5HooksAreIdempotent::hookTable($this->contractSubject());
+
+        $this->assertNotNull(
+            $hooks,
+            'getHooks() could not be evaluated at all -- assertion A-5 reports the root cause'
+        );
 
         $this->assertSame(
             [
-            'system.settings',
-            'function.requirements',
-        ],
-            array_keys(Plugin::getHooks()),
+                'system.settings',
+                'function.requirements',
+            ],
+            array_keys($hooks),
             'the hook table changed shape -- a key was added, removed or renamed'
         );
 
-        foreach (Plugin::getHooks() as $key => $handler) {
+        foreach ($hooks as $key => $handler) {
             $this->assertIsCallable($handler, $key.' no longer resolves to anything callable');
         }
     }
